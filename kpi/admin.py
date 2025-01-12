@@ -23,6 +23,7 @@ class CardAdmin(admin.ModelAdmin):
 
     def result(self, instance: Card):
         return instance.value
+    
     class Media:
         js = (
             'js/kpi_admin.js',
