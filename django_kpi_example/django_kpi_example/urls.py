@@ -17,8 +17,11 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from kpi_example.views import kpi_dashboards
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('kpi/', include('django_kpi.urls')),
+    path('', kpi_dashboards, name='kpi_dashboards'),
+
 ]
