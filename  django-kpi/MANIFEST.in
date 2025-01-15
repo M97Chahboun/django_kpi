@@ -1,0 +1,2 @@
+recursive-include django_kpi/static *
+recursive-include django_kpi/templates *
