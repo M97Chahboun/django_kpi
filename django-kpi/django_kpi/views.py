@@ -4,7 +4,6 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_GET
 from django.apps import apps
 from .models import Card
-
 @require_GET
 @staff_member_required
 def get_model_fields(request):
@@ -18,6 +17,9 @@ def get_model_fields(request):
         
         fields = []
         for field in model._meta.fields:
+            print(field.is_relation)
+            if field.is_relation:
+                continue
             fields.append({
                 'name': field.name,
                 'verbose_name': str(field.verbose_name).title(),

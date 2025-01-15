@@ -1,7 +1,7 @@
 # Suggested code may be subject to a license. Learn more: ~LicenseLog:4141344616.
 from django import forms
 
-from kpi.utils import get_available_models
+from .utils import get_available_models
 from .models import KPI, Card
 # from core.widgets import IconPicker
 from django.core.exceptions import ValidationError
