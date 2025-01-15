@@ -28,13 +28,24 @@ pip install django_kpi
     ]
     ```
 
-2. Run the migrations to create the necessary database tables:
+2. Update your `urls.py` to include the `django_kpi` URLs:
+
+    ```python
+    from django.urls import path, include
+
+    urlpatterns = [
+        ...
+        path('kpi/', include('django_kpi.urls')),
+    ]
+    ```
+
+3. Run the migrations to create the necessary database tables:
 
     ```bash
     python manage.py migrate
     ```
 
-3. Define your KPIs in the Django admin interface or through the provided API.
+4. Define your KPIs in the Django admin interface or through the provided API.
 
 ## Contributing
 
