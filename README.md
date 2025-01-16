@@ -47,6 +47,16 @@ pip install django_kpi
 
 4. Define your KPIs in the Django admin interface or through the provided API.
 
+## Screenshots
+
+### Input
+
+![Input](input.png)
+
+### Output
+
+![Output](output.png)
+
 ## Contributing
 
 Contributions are welcome! Please submit a pull request or open an issue to discuss your ideas.
