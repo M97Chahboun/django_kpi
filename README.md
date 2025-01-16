@@ -5,7 +5,7 @@
 ## Features
 
 - Define custom KPIs
-- Track KPI performance over time
+- Track KPI performance over time (WIP)
 - Flexible configuration options
 - Easy integration with existing Django projects
 
