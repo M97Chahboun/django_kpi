@@ -12,7 +12,7 @@ class KPIAdmin(admin.ModelAdmin):
 @admin.register(Card)
 class CardAdmin(admin.ModelAdmin):
     form = CardAdminForm
-    list_display = ['avatar', 'name', 'kpi', 'operation', 'target_field', 'condition', 'target_value', 'result']
+    list_display = ['svg_icon', 'name', 'kpi', 'operation', 'target_field', 'condition', 'target_value', 'result']
     list_filter = ['kpi', 'operation', 'condition']
     search_fields = ['name', 'kpi__name', 'description']
     fieldsets = (

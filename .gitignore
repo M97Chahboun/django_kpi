@@ -4,3 +4,4 @@ django-kpi/django_kpi.egg-info/
 django-kpi/dist/
 .vscode/branch-timer.json
 django_kpi_example/db.sqlite3
+django_kpi_example/media/**

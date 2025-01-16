@@ -2,7 +2,7 @@ from django.db import models
 from django.apps import apps
 from django.utils.html import format_html
 from .utils import KPIQueryHelper
-
+from django_icon_picker.field import IconField
 class KPI(models.Model):
     """
     Main KPI model with comparison conditions
@@ -66,7 +66,7 @@ class Card(models.Model):
     kpi = models.ForeignKey(KPI, on_delete=models.CASCADE, related_name='card')
     name = models.CharField(max_length=100, help_text="Name of the card")
     description = models.TextField(blank=True, help_text="Optional description of the card")
-    icon = models.CharField(max_length=50, help_text="Icon class or name")
+    icon = IconField(max_length=50, help_text="Icon class or name")
     value_suffix = models.CharField(max_length=50, blank=True, help_text="Suffix to append to the value (e.g., %, $)")
     operation = models.CharField(max_length=16, choices=OPERATION_CHOICES, default='count')
     target_type = models.CharField(
@@ -91,10 +91,12 @@ class Card(models.Model):
         help_text="Target value to achieve"
     )
 
-    def avatar(self):
+    def svg_icon(self):
         return format_html(
-            '<img src="https://api.iconify.design/{}.svg?color=grey" height="30" width="30"/>'.format(
-                self.icon
+            '<img src="{}" height="30" width="30"/>'.format(
+                f"/{self.icon}"
+                if self.icon.endswith(".svg")
+                else f"https://api.iconify.design/{self.icon}.svg"
             )
         )
 

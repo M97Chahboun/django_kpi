@@ -17,7 +17,7 @@ def get_model_fields(request):
         
         fields = []
         for field in model._meta.fields:
-            print(field.is_relation)
+            # TODO: Handle relationship fields
             if field.is_relation:
                 continue
             fields.append({
