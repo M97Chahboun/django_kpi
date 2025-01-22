@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_GET
 from django.apps import apps
-from .models import Card
+from .models import KpiCard
 @require_GET
 @staff_member_required
 def get_model_fields(request):
@@ -59,6 +59,6 @@ def get_field_values(request):
 
 
 def dashboard_callback(request, context):
-    cards = Card.objects.all()
+    cards = KpiCard.objects.all()
     context.update({"cards": cards})
     return context

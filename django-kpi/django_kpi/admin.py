@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import KPI, Card
+from .models import KPI, KpiCard
 from .forms import KPIAdminForm, CardAdminForm
 
 @admin.register(KPI)
@@ -9,7 +9,7 @@ class KPIAdmin(admin.ModelAdmin):
     list_filter = ('model_field',)
     search_fields = ('name',)
 
-@admin.register(Card)
+@admin.register(KpiCard)
 class CardAdmin(admin.ModelAdmin):
     form = CardAdminForm
     list_display = ['svg_icon', 'name', 'kpi', 'operation', 'target_field', 'condition', 'target_value', 'result']
@@ -21,7 +21,7 @@ class CardAdmin(admin.ModelAdmin):
         ('Target Settings', {'fields': ('target_type', 'target_field', 'condition', 'target_value')}),
     )
 
-    def result(self, instance: Card):
+    def result(self, instance: KpiCard):
         return instance.value
     
     class Media:

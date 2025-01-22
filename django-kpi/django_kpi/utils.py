@@ -4,31 +4,32 @@ from django.db.utils import OperationalError
 from django.core.exceptions import AppRegistryNotReady
 from datetime import datetime
 
-def get_available_models():
-    """
-    Get all available models in the project excluding some built-in models
-    Returns a list of tuples (model_name, verbose_name)
-    """
-    try:
-        excluded_apps = ['admin', 'contenttypes', 'sessions', 'kpi']
-        choices = []
-        
-        for model in apps.get_models():
-            app_label = model._meta.app_label
-            if app_label not in excluded_apps:
-                model_name = f"{app_label}.{model._meta.model_name}"
-                verbose_name = model._meta.verbose_name.title()
-                choices.append((model_name, f"{verbose_name}"))
-        
-        return sorted(choices)
-    except (AppRegistryNotReady, OperationalError):
-        return []
-
-class KPIQueryHelper:
+class KPIService:
     # TODO: Handle excepts using field type
     """
     Helper class to handle KPI query conditions
     """
+    
+    def get_available_models():
+        """
+        Get all available models in the project excluding some built-in models
+        Returns a list of tuples (model_name, verbose_name)
+        """
+        try:
+            excluded_apps = ['admin', 'contenttypes', 'sessions', 'kpi']
+            choices = []
+            
+            for model in apps.get_models():
+                app_label = model._meta.app_label
+                if app_label not in excluded_apps:
+                    model_name = f"{app_label}.{model._meta.model_name}"
+                    verbose_name = model._meta.verbose_name.title()
+                    choices.append((model_name, f"{verbose_name}"))
+            
+            return sorted(choices)
+        except (AppRegistryNotReady, OperationalError):
+            return []
+    
     def apply_condition(self, queryset, condition, target_field, target_value):
         if condition == 'EXACT':
             return queryset.filter(**{f"{target_field}": target_value})

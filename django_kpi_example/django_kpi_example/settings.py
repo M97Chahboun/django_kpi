@@ -128,4 +128,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
 
-DJANGO_ICON_PICKER_PATH = "media"
+ICON_PICKER_PATH = "media"
+ICON_PICKER_COLOR = "#6c757d"

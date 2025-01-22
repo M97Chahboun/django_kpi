@@ -1,8 +1,8 @@
 # Suggested code may be subject to a license. Learn more: ~LicenseLog:4141344616.
 from django import forms
 
-from .utils import get_available_models
-from .models import KPI, Card
+from .utils import KPIService
+from .models import KPI, KpiCard
 # from core.widgets import IconPicker
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -16,7 +16,7 @@ class KPIAdminForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Set choices dynamically in form initialization
         self.fields['model_field'] = forms.ChoiceField(
-            choices=[('', '--- Select Model ---')] + get_available_models(),
+            choices=[('', '--- Select Model ---')] + KPIService.get_available_models(),
             required=True,
             widget=forms.Select
         )
@@ -48,7 +48,7 @@ class CardAdminForm(forms.ModelForm):
             self.fields["icon"].widget.attrs["objectid"] = object_id
         else:
             last_item_id = (
-                Card.objects.last().id if Card.objects.exists() else 1
+                KpiCard.objects.last().id if KpiCard.objects.exists() else 1
             )
             next_id = last_item_id + 1
             self.fields["icon"].widget.attrs["objectid"] = next_id
@@ -86,5 +86,5 @@ class CardAdminForm(forms.ModelForm):
         
 
     class Meta:
-        model = Card
+        model = KpiCard
         fields = '__all__'
