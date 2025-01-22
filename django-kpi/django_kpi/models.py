@@ -1,7 +1,7 @@
 from django.db import models
 from django.apps import apps
 from django.utils.html import format_html
-from .utils import KPIQueryHelper
+from .utils import KPIService
 from django_icon_picker.field import IconField
 class KPI(models.Model):
     """
@@ -23,7 +23,7 @@ class KPI(models.Model):
         """Get the queryset based on the condition and target"""
         app, model_name = self.model_field.split(".")
         queryset = apps.get_model(app, model_name).objects
-        helper = KPIQueryHelper()
+        helper = KPIService()
         return helper.apply_condition(queryset, condition, target_field, target_value)
     
 
@@ -32,7 +32,7 @@ class KPI(models.Model):
         verbose_name_plural = "KPIs"
 
 
-class Card(models.Model):
+class KpiCard(models.Model):
     """
     Card visualization for KPI with one-to-one relationship
     """

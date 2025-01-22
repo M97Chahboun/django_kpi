@@ -1,5 +1,7 @@
 # django_kpi
 
+> ⚠️ **Note:** This package is currently in active development.
+
 `django_kpi` is a Django package designed to create flexible Key Performance Indicators (KPIs) for your projects. This package allows you to define, track, and manage KPIs with ease.
 
 ## Features
@@ -47,6 +49,8 @@ pip install django_kpi
 
 4. Define your KPIs in the Django admin interface or through the provided API.
 
+5. Use KpiCards on your views check [example](./django_kpi_example/kpi_example/views.py)
+
 ## Screenshots
 
 ### Input
@@ -68,3 +72,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact
 
 For questions or support, please contact [mchahboun@majaracapital.com](mailto:mchahboun@majaracapital.com).
+
