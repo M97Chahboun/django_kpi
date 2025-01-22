@@ -1,31 +1,22 @@
 {% extends "admin/base_site.html" %}
 
 {% block title %}Django Admin{% endblock %}
-
+{% load static %}
 {% block extrastyle %}
 <style>
     /* Add any custom styles here */
 </style>
+<script src={% static "gridstack/dist/gridstack-all.js" %}></script>
+<link href={% static "gridstack/dist/gridstack.min.css" %} rel="stylesheet"/>
+
 {% endblock %}
 
 {% block content %}
 <h1>KPI's Dashboard</h1>
 
 <div class="custom-content">
-    <h2>KPI's Cards</h2>
-    <div class="card-container">
-        {% for card in cards %}
-            <div class="card">
-                <div class="card-header">
-                    <h3>{{ card.svg_icon|safe }} {{ card.name }}</h3>
-                </div>
-                <div class="card-body">
-                    <p>{{ card.value }} {{ card.value_suffix }}</p>
-                    <!-- Add more fields as needed -->
-                </div>
-            </div>
-        {% endfor %}
-    </div>
+    <h2> KPI's Cards <a href="kpi/kpicard/add/"><img src="{% static 'add.svg' %}" alt="Add" style="width: 24px; height: 24px; vertical-align: middle;"></a></h2>
+    <div class="grid-stack"></div>
 </div>
 
 <style>
@@ -38,7 +29,6 @@
         border: 1px solid #ccc;
         border-radius: 8px;
         padding: 16px;
-        width: 200px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     .card-header {
@@ -47,6 +37,29 @@
     }
 </style>
 
+ <script type="text/javascript">
+    // NOTE: REAL apps would sanitize-html or DOMPurify before blinding setting innerHTML. see #2736
+    GridStack.renderCB = function(el, w) {
+      el.innerHTML = w.content;
+    };
+
+    let children = [
+      {% for card in cards %}
+        {minW: 2, maxW: 4, w: 2, content: '<div class="card"><div class="card-header"><h3>{{ card.svg_icon|safe }} {{ card.name }}</h3></div><div class="card-body"><p>{{ card.value }} {{ card.value_suffix }}</p></div></div>'},
+      {% endfor %}
+    ];
+    let grid = GridStack.init({
+      acceptWidgets: true,
+      cellHeight: 160,
+      children
+    });
+    
+    grid.on('added removed change', function(e, items) {
+      let str = '';
+      items.forEach(function(item) { str += ' (x,y)=' + item.x + ',' + item.y; });
+      console.log(e.type + ' ' + items.length + ' items:' + str );
+    });
+  </script>
 {% endblock %}
 
 {% block footer %}
