@@ -8,7 +8,8 @@
 </style>
 <script src={% static "gridstack/dist/gridstack-all.js" %}></script>
 <link href={% static "gridstack/dist/gridstack.min.css" %} rel="stylesheet"/>
-
+<link href={% static "gridstack/dist/gridstack-extra.css" %} rel="stylesheet"/>
+ <script src={% static "gridstack/dist/events.js" %}></script>
 {% endblock %}
 
 {% block content %}
@@ -49,9 +50,14 @@
       {% endfor %}
     ];
     let grid = GridStack.init({
-      acceptWidgets: true,
+      children,
+      column: 6,
       cellHeight: 160,
-      children
+      columnOpts: {
+        columnWidth: 150,
+        columnMax: 12,
+        layout: 'none',
+      },
     });
     
     grid.on('added removed change', function(e, items) {
