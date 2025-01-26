@@ -1,0 +1,65 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Django Admin{% endblock %}
+{% load static %}
+{% block extrastyle %}
+<script src={% static "gridstack/dist/gridstack-all.js" %}></script>
+<link href={% static "gridstack/dist/gridstack.min.css" %} rel="stylesheet"/>
+<link href={% static "gridstack/dist/gridstack-extra.css" %} rel="stylesheet"/>
+<script src={% static "gridstack/dist/events.js" %}></script>
+<link href={% static "css/card.css" %} rel="stylesheet"></link>
+{% endblock %}
+
+{% block content %}
+<h1>KPI's Dashboard</h1>
+
+<div class="custom-content">
+    <h2> KPI's Cards <a href="kpi/kpicard/add/"><img src="{% static 'add.svg' %}" alt="Add" style="width: 24px; height: 24px; vertical-align: middle;"></a></h2>
+    <div class="grid-stack"></div>
+</div>
+ <script type="text/javascript">
+    // NOTE: REAL apps would sanitize-html or DOMPurify before blinding setting innerHTML. see #2736
+    GridStack.renderCB = function(el, w) {
+      el.innerHTML = w.content;
+    };
+
+    let children = [
+      {% for card in cards %}
+        {minW: 2, maxH: 1, id: {{ card.id }}, maxW: 4, w: {{ card.position.w }}, x: {{ card.position.x }}, y: {{ card.position.y }}, content: `{% include 'kpi/components/card.html' with card=card %}`.trim()},
+      {% endfor %}
+    ];
+    let grid = GridStack.init({
+      children,
+      column: 2,
+      cellHeight: 160,
+      columnOpts: {
+        columnWidth: 160,
+        columnMax: 12,
+        layout: 'none',
+      },
+    });
+    
+    grid.on('added removed change', function(e, items) {
+      items.forEach(function(item) {
+      fetch('/kpi/update-card-position/', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+        id: item.id,
+        x: item.x,
+        y: item.y,
+        w: item.w,
+        h: item.h
+        })
+      }).catch(error => console.error('Error:', error));
+      });
+    });
+  </script>
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}

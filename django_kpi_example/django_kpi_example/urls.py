@@ -20,10 +20,11 @@ from django.urls import path, include
 from kpi_example.views import kpi_dashboards
 from django.conf import settings
 from django.conf.urls.static import static
+
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('kpi/', include('django_kpi.urls')),
-    path('', kpi_dashboards, name='kpi_dashboards'),
+    path("kpi/", include("django_kpi.urls")),
+    path("", kpi_dashboards, name="kpi_dashboards"),
     path("icon_picker/", include("django_icon_picker.urls")),
 ]
 

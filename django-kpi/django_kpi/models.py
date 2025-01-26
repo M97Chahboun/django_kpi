@@ -3,92 +3,125 @@ from django.apps import apps
 from django.utils.html import format_html
 from .utils import KPIService
 from django_icon_picker.field import IconField
+
+
 class KPI(models.Model):
     """
     Main KPI model with comparison conditions
     """
 
     name = models.CharField(max_length=100)
-    description = models.TextField(blank=True, help_text="Optional description of the KPI")
-    model_field = models.CharField(
-        max_length=100,
-        verbose_name="Model"
+    description = models.TextField(
+        blank=True, help_text="Optional description of the KPI"
     )
+    model_field = models.CharField(max_length=100, verbose_name="Model")
 
     def __str__(self):
         return self.model_field
-    
-    
+
     def get_queryset(self, condition, target_field, target_value):
         """Get the queryset based on the condition and target"""
         app, model_name = self.model_field.split(".")
         queryset = apps.get_model(app, model_name).objects
         helper = KPIService()
         return helper.apply_condition(queryset, condition, target_field, target_value)
-    
 
     class Meta:
         verbose_name = "KPI"
         verbose_name_plural = "KPIs"
 
 
-class KpiCard(models.Model):
+class ComponentPosition(models.Model):
+    """
+    Stores grid position and size for KPI cards
+    """
+
+    component = models.OneToOneField(
+        "KpiComponent", on_delete=models.CASCADE, null=True, blank=True
+    )
+    x = models.IntegerField(default=0, help_text="X coordinate on grid")
+    y = models.IntegerField(default=0, help_text="Y coordinate on grid")
+    w = models.IntegerField(default=2, help_text="Width in grid units")
+    h = models.IntegerField(default=1, help_text="Height in grid units")
+
+    class Meta:
+        verbose_name = "Card Position"
+        verbose_name_plural = "Card Positions"
+
+
+class AbstractKpiComponent(models.Model):
+    """
+    Abstract base class for KPI visualization components
+    """
+
+    kpi = models.ForeignKey(KPI, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, help_text="Name of the component")
+    description = models.TextField(blank=True, help_text="Optional description")
+    published = models.BooleanField(
+        default=True, help_text="Whether this component is visible"
+    )
+
+    class Meta:
+        abstract = True
+
+
+class KpiComponent(AbstractKpiComponent):
+    def __str__(self):
+        return f"{self.name} for {self.kpi.name}"
+
+
+class KpiCard(KpiComponent):
     """
     Card visualization for KPI with one-to-one relationship
     """
+
     TEXT_CONDITION_CHOICES = [
-        ('EXACT', 'Exactly matches'),
-        ('CONTAINS', 'Contains'),
-        ('NOT_EXACT', 'Does not exactly match'),
-        ('NOT_CONTAINS', 'Does not contain'),
+        ("EXACT", "Exactly matches"),
+        ("CONTAINS", "Contains"),
+        ("NOT_EXACT", "Does not exactly match"),
+        ("NOT_CONTAINS", "Does not contain"),
     ]
     NUM_CONDITION_CHOICES = [
-        ('GT', 'Greater Than'),
-        ('LT', 'Less Than'),
-        ('EQ', 'Equal'),
-        ('GTE', 'Greater Than or Equal'),
-        ('LTE', 'Less Than or Equal'),
-        ('BETWEEN', 'Between'),
+        ("GT", "Greater Than"),
+        ("LT", "Less Than"),
+        ("EQ", "Equal"),
+        ("GTE", "Greater Than or Equal"),
+        ("LTE", "Less Than or Equal"),
+        ("BETWEEN", "Between"),
     ]
     CONDITION_CHOICES = [
-        ('TEXT', TEXT_CONDITION_CHOICES),
-        ('NUM', NUM_CONDITION_CHOICES),
-        ('NONE', 'None'),
+        ("TEXT", TEXT_CONDITION_CHOICES),
+        ("NUM", NUM_CONDITION_CHOICES),
+        ("NONE", "None"),
     ]
     OPERATION_CHOICES = [
-        ('count', 'Count'),
-        ('count_distinct', 'Count Distinct'),
-        ('sum', 'Sum'),
-        ('avg', 'Average'),
-        ('min', 'Minimum'),
-        ('max', 'Maximum'),
+        ("count", "Count"),
+        ("count_distinct", "Count Distinct"),
+        ("sum", "Sum"),
+        ("avg", "Average"),
+        ("min", "Minimum"),
+        ("max", "Maximum"),
     ]
-    kpi = models.ForeignKey(KPI, on_delete=models.CASCADE, related_name='card')
-    name = models.CharField(max_length=100, help_text="Name of the card")
-    description = models.TextField(blank=True, help_text="Optional description of the card")
     icon = IconField(max_length=50, help_text="Icon class or name")
-    value_suffix = models.CharField(max_length=50, blank=True, help_text="Suffix to append to the value (e.g., %, $)")
-    operation = models.CharField(max_length=16, choices=OPERATION_CHOICES, default='count')
+    value_suffix = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Suffix to append to the value (e.g., %, $)",
+    )
+    operation = models.CharField(
+        max_length=16, choices=OPERATION_CHOICES, default="count"
+    )
     target_type = models.CharField(
-        max_length=20,
-        default='NUMBER',
-        help_text="Type of the target value"
+        max_length=20, default="NUMBER", help_text="Type of the target value"
     )
     target_field = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="Field to compare against target value"
+        max_length=100, blank=True, help_text="Field to compare against target value"
     )
     condition = models.CharField(
-        max_length=20, 
-        choices=CONDITION_CHOICES,
-        default='EXACT'
+        max_length=20, choices=CONDITION_CHOICES, default="EXACT"
     )
     target_value = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        help_text="Target value to achieve"
+        max_length=255, null=True, blank=True, help_text="Target value to achieve"
     )
 
     def svg_icon(self):
@@ -101,26 +134,58 @@ class KpiCard(models.Model):
         )
 
     @property
+    def position(self):
+        return ComponentPosition.objects.get(component=self)
+
+    @property
     def value(self):
-        queryset = self.kpi.get_queryset(self.condition, self.target_field, self.target_value)
+        queryset = self.kpi.get_queryset(
+            self.condition, self.target_field, self.target_value
+        )
 
-        if self.operation == 'count':
+        if self.operation == "count":
             return queryset.count()
-        elif self.operation == 'count_distinct':
-            return queryset.values(self.target_field).distinct().count()  
-        elif self.operation == 'sum':
-            return queryset.aggregate(models.Sum(self.target_field)).get(f'{self.target_field}__sum', 0) or 0
-        elif self.operation == 'average':
-            return queryset.aggregate(models.Avg(self.target_field)).get(f'{self.target_field}__avg', 0) or 0
-        elif self.operation == 'min':
-            return queryset.aggregate(models.Min(self.target_field)).get(f'{self.target_field}__min', 0) or 0
-        elif self.operation == 'max':
-            return queryset.aggregate(models.Max(self.target_field)).get(f'{self.target_field}__max', 0) or 0
-
+        elif self.operation == "count_distinct":
+            return queryset.values(self.target_field).distinct().count()
+        elif self.operation == "sum":
+            return (
+                queryset.aggregate(models.Sum(self.target_field)).get(
+                    f"{self.target_field}__sum", 0
+                )
+                or 0
+            )
+        elif self.operation == "average":
+            return (
+                queryset.aggregate(models.Avg(self.target_field)).get(
+                    f"{self.target_field}__avg", 0
+                )
+                or 0
+            )
+        elif self.operation == "min":
+            return (
+                queryset.aggregate(models.Min(self.target_field)).get(
+                    f"{self.target_field}__min", 0
+                )
+                or 0
+            )
+        elif self.operation == "max":
+            return (
+                queryset.aggregate(models.Max(self.target_field)).get(
+                    f"{self.target_field}__max", 0
+                )
+                or 0
+            )
 
     def __str__(self):
         return f"Card for {self.kpi.name}"
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=KpiCard)
+def create_component_position(sender, instance, created, **kwargs):
+    if created:
+        ComponentPosition.objects.create(component=instance)
 
 # class Table(models.Model):
 #     """
