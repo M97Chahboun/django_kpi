@@ -31,7 +31,39 @@ class KPI(models.Model):
         verbose_name_plural = "KPIs"
 
 
-class KpiCard(models.Model):
+
+class ComponentPosition(models.Model):
+    """
+    Stores grid position and size for KPI cards
+    """
+
+    x = models.IntegerField(default=0, help_text="X coordinate on grid")
+    y = models.IntegerField(default=0, help_text="Y coordinate on grid")
+    w = models.IntegerField(default=2, help_text="Width in grid units")
+    h = models.IntegerField(default=1, help_text="Height in grid units")
+
+    class Meta:
+        verbose_name = "Card Position"
+        verbose_name_plural = "Card Positions"
+
+class KpiComponent(models.Model):
+    """
+    Abstract base class for KPI visualization components
+    """
+    kpi = models.ForeignKey(KPI, on_delete=models.CASCADE)
+    position = models.OneToOneField(ComponentPosition, on_delete=models.CASCADE, null=True)
+    name = models.CharField(max_length=100, help_text="Name of the component")
+    description = models.TextField(blank=True, help_text="Optional description")
+    published = models.BooleanField(default=True, help_text="Whether this component is visible")
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.__class__.__name__} for {self.kpi.name}"
+
+
+class KpiCard(KpiComponent):
     """
     Card visualization for KPI with one-to-one relationship
     """
@@ -63,17 +95,6 @@ class KpiCard(models.Model):
         ("min", "Minimum"),
         ("max", "Maximum"),
     ]
-    kpi = models.ForeignKey(KPI, on_delete=models.CASCADE, related_name="card")
-    position = models.OneToOneField(
-        "ComponentPosition",
-        on_delete=models.CASCADE,
-        related_name="position",
-        null=True,
-    )
-    name = models.CharField(max_length=100, help_text="Name of the card")
-    description = models.TextField(
-        blank=True, help_text="Optional description of the card"
-    )
     icon = IconField(max_length=50, help_text="Icon class or name")
     value_suffix = models.CharField(
         max_length=50,
@@ -94,9 +115,6 @@ class KpiCard(models.Model):
     )
     target_value = models.CharField(
         max_length=255, null=True, blank=True, help_text="Target value to achieve"
-    )
-    published = models.BooleanField(
-        default=True, help_text="Whether this KPI card is published and visible"
     )
 
     def svg_icon(self):
@@ -149,21 +167,6 @@ class KpiCard(models.Model):
 
     def __str__(self):
         return f"Card for {self.kpi.name}"
-
-
-class ComponentPosition(models.Model):
-    """
-    Stores grid position and size for KPI cards
-    """
-
-    x = models.IntegerField(default=0, help_text="X coordinate on grid")
-    y = models.IntegerField(default=0, help_text="Y coordinate on grid")
-    w = models.IntegerField(default=2, help_text="Width in grid units")
-    h = models.IntegerField(default=1, help_text="Height in grid units")
-
-    class Meta:
-        verbose_name = "Card Position"
-        verbose_name_plural = "Card Positions"
 
 
 # class Table(models.Model):
