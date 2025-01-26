@@ -8,56 +8,58 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 import json
 
+
 @require_GET
 @staff_member_required
 def get_model_fields(request):
     if not request.user.is_authenticated or not request.user.is_staff:
-        return JsonResponse({'error': 'Unauthorized'}, status=403)
-        
-    model_name = request.GET.get('model')
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    model_name = request.GET.get("model")
     try:
-        app_label, model_name = model_name.split('.')
+        app_label, model_name = model_name.split(".")
         model = apps.get_model(app_label, model_name)
-        
+
         fields = []
         for field in model._meta.fields:
             # TODO: Handle relationship fields
             if field.is_relation:
                 continue
-            fields.append({
-                'name': field.name,
-                'verbose_name': str(field.verbose_name).title(),
-                'type': field.get_internal_type()
-            })
-        
-        return JsonResponse({'fields': fields})
+            fields.append(
+                {
+                    "name": field.name,
+                    "verbose_name": str(field.verbose_name).title(),
+                    "type": field.get_internal_type(),
+                }
+            )
+
+        return JsonResponse({"fields": fields})
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({"error": str(e)}, status=400)
+
 
 @require_GET
 @staff_member_required
 def get_field_values(request):
     if not request.user.is_authenticated or not request.user.is_staff:
-        return JsonResponse({'error': 'Unauthorized'}, status=403)
-        
-    model_name = request.GET.get('model')
-    field_name = request.GET.get('field')
-    
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    model_name = request.GET.get("model")
+    field_name = request.GET.get("field")
+
     try:
-        app_label, model_name = model_name.split('.')
+        app_label, model_name = model_name.split(".")
         model = apps.get_model(app_label, model_name)
-                
+
         # Get distinct values
         values = list(model.objects.values_list(field_name, flat=True).distinct())
-        
+
         # Convert all values to strings for consistent display
         values = [str(v) for v in values if v is not None]
-        
-        return JsonResponse({
-            'values': values
-        })
+
+        return JsonResponse({"values": values})
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({"error": str(e)}, status=400)
 
 
 @csrf_protect
@@ -65,19 +67,19 @@ def get_field_values(request):
 @staff_member_required
 def update_card_position(request):
     if not request.user.is_authenticated or not request.user.is_staff:
-        return JsonResponse({'error': 'Unauthorized'}, status=403)
-    
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
     try:
         data = json.loads(request.body)
-        card = KpiCard.objects.get(id=data['id'])
-        
+        card = KpiCard.objects.get(id=data["id"])
+
         # Update position
-        card.position.x = data['x']
-        card.position.y = data['y']
-        card.position.w = data['w']
-        card.position.h = data['h']
+        card.position.x = data["x"]
+        card.position.y = data["y"]
+        card.position.w = data["w"]
+        card.position.h = data["h"]
         card.position.save()
-        
-        return JsonResponse({'status': 'success'})
+
+        return JsonResponse({"status": "success"})
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({"error": str(e)}, status=400)
