@@ -12,6 +12,12 @@ class KPIAdmin(admin.ModelAdmin):
     list_filter = ("model_field",)
     search_fields = ("name",)
 
+@admin.register(ComponentPosition)
+class ComponentPositionAdmin(admin.ModelAdmin):
+    list_display = ('component', 'x', 'y', 'w', 'h')
+    list_filter = ('component',)
+    search_fields = ('component__name',)
+
 
 @admin.register(KpiCard)
 class CardAdmin(admin.ModelAdmin):

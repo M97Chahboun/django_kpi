@@ -64,12 +64,10 @@ class AbstractKpiComponent(models.Model):
     class Meta:
         abstract = True
 
-    def __str__(self):
-        return f"{self.__class__.__name__} for {self.kpi.name}"
-
 
 class KpiComponent(AbstractKpiComponent):
-    pass
+    def __str__(self):
+        return f"{self.name} for {self.kpi.name}"
 
 
 class KpiCard(KpiComponent):
@@ -181,6 +179,13 @@ class KpiCard(KpiComponent):
     def __str__(self):
         return f"Card for {self.kpi.name}"
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=KpiCard)
+def create_component_position(sender, instance, created, **kwargs):
+    if created:
+        ComponentPosition.objects.create(component=instance)
 
 # class Table(models.Model):
 #     """
