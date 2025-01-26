@@ -25,9 +25,16 @@ class CardAdmin(admin.ModelAdmin):
         "condition",
         "target_value",
         "result",
+        "published",
     ]
-    list_filter = ["kpi", "operation", "condition"]
+    list_filter = ["kpi", "operation", "condition", "published"]
     search_fields = ["name", "kpi__name", "description"]
+    actions = [
+        "publish_cards",
+        "unpublish_cards",
+        "reset_positions",
+        "duplicate_cards",
+    ]
     fieldsets = (
         (
             None,
@@ -36,12 +43,40 @@ class CardAdmin(admin.ModelAdmin):
         ("Value Settings", {"fields": ("value_suffix", "operation")}),
         (
             "Target Settings",
-            {"fields": ("target_type", "target_field", "condition", "target_value")},
+            {
+                "fields": (
+                    "target_type",
+                    "target_field",
+                    "condition",
+                    "target_value",
+                )
+            },
         ),
     )
 
     def result(self, instance: KpiCard):
         return instance.value
+
+    def publish_cards(self, request, queryset):
+        queryset.update(published=True)
+
+    publish_cards.short_description = "Publish selected cards"
+
+    def unpublish_cards(self, request, queryset):
+        queryset.update(published=False)
+
+    unpublish_cards.short_description = "Unpublish selected cards"
+
+    def reset_positions(self, request, queryset):
+        for card in queryset:
+            position = card.position
+            position.x = 0
+            position.y = 0
+            position.w = 2
+            position.h = 1
+            position.save()
+
+    reset_positions.short_description = "Reset card positions"
 
     class Media:
         js = ("js/kpi_admin.js",)

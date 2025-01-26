@@ -31,12 +31,14 @@ class KPI(models.Model):
         verbose_name_plural = "KPIs"
 
 
-
 class ComponentPosition(models.Model):
     """
     Stores grid position and size for KPI cards
     """
-    component = models.OneToOneField("KpiComponent", on_delete=models.CASCADE, null=True, blank=True)
+
+    component = models.OneToOneField(
+        "KpiComponent", on_delete=models.CASCADE, null=True, blank=True
+    )
     x = models.IntegerField(default=0, help_text="X coordinate on grid")
     y = models.IntegerField(default=0, help_text="Y coordinate on grid")
     w = models.IntegerField(default=2, help_text="Width in grid units")
@@ -46,14 +48,18 @@ class ComponentPosition(models.Model):
         verbose_name = "Card Position"
         verbose_name_plural = "Card Positions"
 
+
 class AbstractKpiComponent(models.Model):
     """
     Abstract base class for KPI visualization components
     """
+
     kpi = models.ForeignKey(KPI, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text="Name of the component")
     description = models.TextField(blank=True, help_text="Optional description")
-    published = models.BooleanField(default=True, help_text="Whether this component is visible")
+    published = models.BooleanField(
+        default=True, help_text="Whether this component is visible"
+    )
 
     class Meta:
         abstract = True
@@ -61,8 +67,10 @@ class AbstractKpiComponent(models.Model):
     def __str__(self):
         return f"{self.__class__.__name__} for {self.kpi.name}"
 
+
 class KpiComponent(AbstractKpiComponent):
     pass
+
 
 class KpiCard(KpiComponent):
     """
@@ -126,7 +134,7 @@ class KpiCard(KpiComponent):
                 else f"https://api.iconify.design/{self.icon}.svg"
             )
         )
-    
+
     @property
     def position(self):
         return ComponentPosition.objects.get(component=self)
