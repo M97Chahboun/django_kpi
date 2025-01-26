@@ -46,7 +46,7 @@
 
     let children = [
       {% for card in cards %}
-        {minW: 2, id: {{ card.id }}, maxW: 4, w: {{ card.position.w }}, x: {{ card.position.x }}, y: {{ card.position.y }}, content: '<div class="card"><div class="card-header"><h3>{{ card.svg_icon|safe }} {{ card.name }}</h3></div><div class="card-body"><p>{{ card.value }} {{ card.value_suffix }}</p></div></div>'},
+        {minW: 2, maxH: 1, id: {{ card.id }}, maxW: 4, w: {{ card.position.w }}, x: {{ card.position.x }}, y: {{ card.position.y }}, content: '<div class="card"><div class="card-header"><h3>{{ card.svg_icon|safe }} {{ card.name }}</h3></div><div class="card-body"><p>{{ card.value }} {{ card.value_suffix }}</p></div></div>'},
       {% endfor %}
     ];
     let grid = GridStack.init({
