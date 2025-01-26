@@ -46,7 +46,7 @@
 
     let children = [
       {% for card in cards %}
-        {minW: 2, maxW: 4, w: 2, content: '<div class="card"><div class="card-header"><h3>{{ card.svg_icon|safe }} {{ card.name }}</h3></div><div class="card-body"><p>{{ card.value }} {{ card.value_suffix }}</p></div></div>'},
+        {minW: 2, id: {{card.id}}, maxW: 4, w: {{ card.position.w }},x: {{ card.position.x }},y: {{ card.position.y }}, content: '<div class="card"><div class="card-header"><h3>{{ card.svg_icon|safe }} {{ card.name }}</h3></div><div class="card-body"><p>{{ card.value }} {{ card.value_suffix }}</p></div></div>'},
       {% endfor %}
     ];
     let grid = GridStack.init({
@@ -61,9 +61,22 @@
     });
     
     grid.on('added removed change', function(e, items) {
-      let str = '';
-      items.forEach(function(item) { str += ' (x,y)=' + item.x + ',' + item.y; });
-      console.log(e.type + ' ' + items.length + ' items:' + str );
+      items.forEach(function(item) {
+      fetch('/kpi/update-card-position/', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+        id: item.id,
+        x: item.x,
+        y: item.y,
+        w: item.w,
+        h: item.h
+        })
+      }).catch(error => console.error('Error:', error));
+      });
     });
   </script>
 {% endblock %}

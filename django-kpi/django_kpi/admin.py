@@ -1,6 +1,8 @@
 from django.contrib import admin
-from .models import KPI, KpiCard
+from .models import KPI, KpiCard, ComponentPosition
 from .forms import KPIAdminForm, CardAdminForm
+
+admin.site.index_template = "kpi/kpi_dashboards.html"
 
 @admin.register(KPI)
 class KPIAdmin(admin.ModelAdmin):
@@ -16,7 +18,7 @@ class CardAdmin(admin.ModelAdmin):
     list_filter = ['kpi', 'operation', 'condition']
     search_fields = ['name', 'kpi__name', 'description']
     fieldsets = (
-        (None, {'fields': ('kpi', 'name', 'description', 'icon')}),
+        (None, {'fields': ('kpi', 'name', 'description', 'icon', 'position', 'published')}),
         ('Value Settings', {'fields': ('value_suffix', 'operation')}),
         ('Target Settings', {'fields': ('target_type', 'target_field', 'condition', 'target_value')}),
     )
@@ -28,3 +30,8 @@ class CardAdmin(admin.ModelAdmin):
         js = (
             'js/kpi_admin.js',
         )
+
+@admin.register(ComponentPosition)
+class ComponentPositionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'x', 'y', 'w', 'h')
+    search_fields = ('kpi_card__name',)

@@ -4,6 +4,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_GET
 from django.apps import apps
 from .models import KpiCard
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_POST
+import json
+
 @require_GET
 @staff_member_required
 def get_model_fields(request):
@@ -29,8 +33,6 @@ def get_model_fields(request):
         return JsonResponse({'fields': fields})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
-
-
 
 @require_GET
 @staff_member_required
@@ -58,7 +60,24 @@ def get_field_values(request):
         return JsonResponse({'error': str(e)}, status=400)
 
 
-def dashboard_callback(request, context):
-    cards = KpiCard.objects.all()
-    context.update({"cards": cards})
-    return context
+@csrf_protect
+@require_POST
+@staff_member_required
+def update_card_position(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        card = KpiCard.objects.get(id=data['id'])
+        
+        # Update position
+        card.position.x = data['x']
+        card.position.y = data['y']
+        card.position.w = data['w']
+        card.position.h = data['h']
+        card.position.save()
+        
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

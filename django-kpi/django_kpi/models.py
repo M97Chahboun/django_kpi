@@ -64,6 +64,7 @@ class KpiCard(models.Model):
         ('max', 'Maximum'),
     ]
     kpi = models.ForeignKey(KPI, on_delete=models.CASCADE, related_name='card')
+    position = models.OneToOneField("ComponentPosition", on_delete=models.CASCADE, related_name='position', null=True)
     name = models.CharField(max_length=100, help_text="Name of the card")
     description = models.TextField(blank=True, help_text="Optional description of the card")
     icon = IconField(max_length=50, help_text="Icon class or name")
@@ -90,6 +91,12 @@ class KpiCard(models.Model):
         blank=True,
         help_text="Target value to achieve"
     )
+    published = models.BooleanField(
+        default=True,
+        help_text="Whether this KPI card is published and visible"
+    )
+    
+    
 
     def svg_icon(self):
         return format_html(
@@ -121,6 +128,19 @@ class KpiCard(models.Model):
     def __str__(self):
         return f"Card for {self.kpi.name}"
 
+
+class ComponentPosition(models.Model):
+    """
+    Stores grid position and size for KPI cards
+    """
+    x = models.IntegerField(default=0, help_text="X coordinate on grid")
+    y = models.IntegerField(default=0, help_text="Y coordinate on grid")
+    w = models.IntegerField(default=2, help_text="Width in grid units")
+    h = models.IntegerField(default=1, help_text="Height in grid units")
+
+    class Meta:
+        verbose_name = "Card Position"
+        verbose_name_plural = "Card Positions"
 
 # class Table(models.Model):
 #     """
