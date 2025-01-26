@@ -71,14 +71,14 @@ def update_card_position(request):
 
     try:
         data = json.loads(request.body)
-        card = KpiCard.objects.get(id=data["id"])
+        position = KpiCard.objects.get(id=data["id"]).position
 
         # Update position
-        card.position.x = data["x"]
-        card.position.y = data["y"]
-        card.position.w = data["w"]
-        card.position.h = data["h"]
-        card.position.save()
+        position.x = data["x"]
+        position.y = data["y"]
+        position.w = data["w"]
+        position.h = data["h"]
+        position.save()
 
         return JsonResponse({"status": "success"})
     except Exception as e:
